@@ -1,0 +1,6 @@
+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
+
+git remote add origin https://github.com/wlander/spyder_ccn
+
+git push origin master
+
