@@ -20,7 +20,7 @@ class Msg_out:
         
     def msg(self, msg, src):
         if self.out_type=="console":
-            print(msg)
+            print(msg, " / " , src)
         elif self.out_type=="log":
             try:
                 #try open file for log

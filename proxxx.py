@@ -17,24 +17,24 @@ from fake_useragent import UserAgent
 logger = get_logger()
 logger.propagate = False
  
-uagent = UserAgent()
-uagent.update()
+#uagent = UserAgent()
+#uagent.update()
           
 class proxy_distr:
         
-    def __init__(self):
+    def __init__(self, proxy_file = None):
         
-        self.proxy_file = "data/proxy_full.txt"
+        if(proxy_file==None): self.proxy_file = "data/proxy_full.txt"
         self.tor = True
-        self.num_tor_reip = 3
+        self.num_tor_reip = 1
         self.cnt_reip = 0        
-        self.check_proxy_num = 100
-        self.proxy_list = self.get_proxy_from_file(self.proxy_file)
+        self.check_proxy_num = 10
+        self.proxy_list = self.get_list_from_file(self.proxy_file)
         self.tor_proxy = {'http': 'socks5://localhost:9050', 'https': 'socks5://localhost:9050'}
         self.tor_paswwd = "1982god39"    
  
         self.uagent_file = "data/user_agents/user_agents.txt"
-        self.uagent_list = self.get_proxy_from_file(self.uagent_file)
+        self.uagent_list = self.get_list_from_file(self.uagent_file)
         self.ua_file = True
         
         

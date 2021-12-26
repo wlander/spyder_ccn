@@ -32,7 +32,8 @@ offers_start = ',"offers":[{'
 offers_stop = ',"aggregatedOffers"'
 
 #template json custom filter from cian (filter field from cian json)
-with open("/home/gravicapa/projects/spyders/projects/spyder_ccn/data/templates/template_filters.json", "r", encoding="utf8") as f:  
+#with open("/home/gravicapa/projects/spyders/projects/spyder_ccn/data/templates/template_filters.json", "r", encoding="utf8") as f:  
+with open("/home/wlander/prog/pet_projects/spyder_ccn/data/templates/template_filters.json", "r", encoding="utf8") as f:     
     custom_filter_cian = json.loads(f.read())
     f.close()
 

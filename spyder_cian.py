@@ -17,39 +17,43 @@ import proxxx as prx
 class spyder_cian:
 
     
-    def __init__(self, proxy_file = None):
+    def __init__(self, proxy_en = False, uagent_en = False, proxy_file = None):
         
         self.proxy_d = prx.proxy_distr()
         
         if isinstance(proxy_file, str):  self.proxy_d = prx.proxy_distr(proxy_file)
         else: self.proxy_d = prx.proxy_distr()
-        
+            
+        self.proxy_en = proxy_en
+        self.uagent_en = uagent_en
         self.fillter_cian = custom_filter_cian()
         self.pages_info = {'total_num_pages': 0, 'total_offers': 0, 'page_len': 0, 'page_data': "0"} 
         self.offers_list = []
-
         
-    def get_json_data(rsp):
+        
+    def get_json_data(self,rsp):
         
         data_str = rsp.text                
         str_json = pt.json_start + data_str[data_str.find(pt.json_start)+len(pt.json_start):data_str.find(pt.json_stop)].strip() + ':{}}]'             
         return json.loads(str_json)
  
        
-    def get_reguest(self, num_page, header = utils.get_header(), prox = None):
+    def get_reguest(self, num_page):
+                
+        set_url = pt.base_url+pt.custom_req_url               
         
-        set_url = pt.base_url+pt.custom_req_url
+        if self.uagent_en is True: hr = utils.get_header()
+        else: hr = pt.url_headers[1] #if header is undefined - header = define header
         
-        hr = header
-        if header is None: hr = pt.url_headers[0] #if header is undefined - header = define header
-        
-        if prox is not None: response = requests.get(set_url.format(num_page), headers=hr, proxies=prox)
-        else: response = requests.get(set_url.format(num_page), headers=hr)        
-
+        if (self.proxy_en==True):
+            response = requests.get(set_url.format(num_page), headers=hr, proxies=self.proxy_d.get_proxy())
+        else: 
+            response = requests.get(set_url.format(num_page), headers=hr)        
+            
         if(response.status_code==200):
             return response            
         else:
-            utils.msgo.msg("response.status_code: " + response.status_code, ", def - get_page_data")          
+            utils.msgo.msg("response.status_code: " + str(response.status_code), ", def - get_page_data")          
             return 0
 
         
@@ -78,7 +82,7 @@ class spyder_cian:
     def get_pages_info(self):
         
         #get first page
-        rsp = self.get_reguest(0, utils.get_header(), self.proxy_d.get_proxy())
+        rsp = self.get_reguest(0)
         total_num_pages = 0
                 
         if rsp!=0:
@@ -97,20 +101,23 @@ class spyder_cian:
     
     def get_page_offers(self, p):
     
-        rsp = self.get_reguest(p, utils.get_header(), self.proxy_d.get_proxy())
+        rsp = self.get_reguest(p)
                     
         if rsp!=0:
                         
             json_data = self.get_json_data(rsp)
             sign_num =  len(json_data)-1
             page_len = len(json_data[sign_num]['value']['results']['offers'])
-                        
+            
+            print("offers_page_len: " + str(page_len))
+            
             for p in range(page_len):
-                flf = self.offer_check_filter(json_data[sign_num]['value']['results']['offers'][p])
+                #flf = self.offer_check_filter(json_data[sign_num]['value']['results']['offers'][p])
+                flf=0
                 if(flf==2): return 1
                 elif(flf==0): self.offers_list.append(json_data[sign_num]['value']['results']['offers'][p])          
         
-            return 1
+            return page_len
     
         return 0
     
@@ -137,7 +144,31 @@ class spyder_cian:
             
         return 0
 
-
+    def write_offers_to_file_as_json(self, file_name = "offers.json"):
+        
+    
+        if(len(self.offers_list)>0):    
+            
+            utils.msgo.msg("start write_offers_to_file num_page = " + str(len(self.offers_list)), "write_offers_to_file_as_json")
+            
+            with open("out/"+file_name, "w", encoding="utf8") as f:
+                
+                utils.msgo.msg("file is opened!", "write_offers_to_file_as_json")
+                
+                f.write(pt.open_json)    
+                
+                next_page = ',"page{}":'
+                
+                for p in range(len(self.offers_list)):
+                    f.write(pt.open_json) 
+                    f.write(next_page.format(p+1))                                  
+                    f.write(self.offers_list[p])
+                    f.write(pt.close_json)
+                
+                f.write(pt.stop_json)               
+                f.close()  
+        else:
+            utils.msgo.msg("num_page =0 !", "write_offers_to_file_as_json")
     
 class custom_filter_cian:
 
